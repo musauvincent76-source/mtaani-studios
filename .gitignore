@@ -1,0 +1,5 @@
+node_modules
+.vite
+backend/uploads
+backend/generated
+.env
