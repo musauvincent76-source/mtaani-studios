@@ -1,27 +1,39 @@
-# Private AI Music Studio - Upgraded
+# Private AI Music Studio
 
-Advanced browser-based personal music studio with voice synthesis, song history, and MP3 export.
+A personal music creation studio for generating warm Afro-inspired songs, custom lyrics, and local audio mixes with optional voice synthesis support.
+
+This project is designed as a private/local creative tool and can also be showcased publicly without requiring real API credentials.
 
 ## Features
-- **Personal Studio**: Private music creation workspace
-- **Custom Lyrics**: Write your own or auto-generate
-- **Voice Upload**: Upload your voice sample for personalized output
-- **Style Selection**: strings, benga, afrobeat, acoustic, soul
-- **Song History**: Save and reload past creations
-- **MP3 Export**: Download songs in MP3 format (with ffmpeg)
-- **Human-like Voice**: Optional ElevenLabs integration
-- **Real-time Preview**: Play and edit before download
+- Personal music studio interface
+- Input title, genre, mood, theme, language, style, and duration
+- Custom or auto-generated lyrics
+- Optional uploaded voice sample
+- Local beat generation + voice-like layer mix
+- Song history panel for previously generated tracks
+- Downloadable audio output
+- Optional ElevenLabs integration for better voice quality
+- Built to work even without any external API key
 
-## Stack
+## Tech Stack
 - Frontend: React + Vite
 - Backend: Python + FastAPI
-- Audio: WAV generation, mixing, MP3 conversion
-- Voice API: ElevenLabs (optional)
-- Storage: Local JSON history
+- Audio processing: Python WAV generation and mixing
+- Optional voice synthesis: ElevenLabs
+- Local storage: JSON history file
 
-## Quick Start
+## Project Structure
+- `backend/main.py` — FastAPI app and audio generation logic
+- `backend/requirements.txt` — Python dependencies
+- `backend/.env.example` — sample env file
+- `frontend/package.json` — frontend config
+- `frontend/src/App.jsx` — main UI logic
+- `frontend/src/styles.css` — styling
+- `README.md` — project overview
 
-### Backend
+## Run Locally
+
+### 1. Backend
 ```bash
 cd backend
 python -m venv venv
@@ -30,23 +42,37 @@ pip install -r requirements.txt
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### Frontend
+### 2. Frontend
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-Open: http://localhost:5173
+Then open:
+```text
+http://localhost:5173
+```
 
-## ElevenLabs Setup (Optional)
+## Optional Voice Setup
+If you want stronger voice synthesis, optionally set these environment variables:
+
 ```bash
-export ELEVENLABS_API_KEY="your_key_here"
+export ELEVENLABS_API_KEY="your_api_key_here"
 export ELEVENLABS_VOICE_ID="your_voice_id_here"
 ```
 
+If those values are not set, the app still works using a built-in fallback voice-like synth.
+
+## Public-Safe Notes
+This project is safe to use as a public demo because:
+- no real API credentials are required for normal use
+- `.env` is ignored by git
+- no sensitive keys are included in the repository by default
+- external services are optional only
+
 ## Notes
-- This is a personal/private MVP
-- Song history stored in `backend/history.json`
-- FFmpeg required for MP3 export (optional)
-- Works without voice API using fallback synth
+This is a private/local creative MVP designed for personal music creation. It is intentionally simple, functional, and easy to extend later with more advanced audio tools, cloud storage, or user accounts.
+
+## License
+This project is provided as a personal demo project for music studio experimentation and learning.
