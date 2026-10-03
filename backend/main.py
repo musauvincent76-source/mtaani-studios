@@ -2,7 +2,7 @@ from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
-import math, os, random, shutil, uuid, wave
+import json, math, os, random, shutil, uuid, wave, subprocess
 from datetime import datetime
 from typing import Optional
 import requests
@@ -20,6 +20,7 @@ app.add_middleware(
 BASE_DIR = Path(__file__).resolve().parent
 UPLOAD_DIR = BASE_DIR / "uploads"
 GENERATED_DIR = BASE_DIR / "generated"
+HISTORY_PATH = BASE_DIR / "history.json"
 UPLOAD_DIR.mkdir(exist_ok=True)
 GENERATED_DIR.mkdir(exist_ok=True)
 
@@ -27,6 +28,51 @@ app.mount("/generated", StaticFiles(directory=str(GENERATED_DIR)), name="generat
 
 ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
 ELEVENLABS_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID")
+
+
+def ensure_history_file() -> None:
+    if not HISTORY_PATH.exists():
+        HISTORY_PATH.write_text("[]", encoding="utf-8")
+
+
+def load_history() -> list:
+    ensure_history_file()
+    try:
+        data = json.loads(HISTORY_PATH.read_text(encoding="utf-8"))
+        return data if isinstance(data, list) else []
+    except Exception:
+        return []
+
+
+def save_history(history: list) -> None:
+    HISTORY_PATH.write_text(json.dumps(history, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def add_history_item(item: dict) -> None:
+    history = load_history()
+    history.insert(0, item)
+    save_history(history)
+
+
+def maybe_export_mp3(wav_path: str) -> str:
+    base_name = os.path.splitext(wav_path)[0]
+    mp3_path = f"{base_name}.mp3"
+    ffmpeg_bin = shutil.which("ffmpeg")
+    if not ffmpeg_bin:
+        return wav_path
+    try:
+        subprocess.run([
+            ffmpeg_bin,
+            "-y",
+            "-i", wav_path,
+            "-vn",
+            "-codec:a", "libmp3lame",
+            "-q:a", "2",
+            mp3_path,
+        ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        return mp3_path
+    except Exception:
+        return wav_path
 
 
 def get_default_lyrics(title: str, genre: str, mood: str, theme: str, language: str) -> str:
@@ -241,6 +287,11 @@ def health():
     return {"ok": True}
 
 
+@app.get("/api/song-history")
+def song_history():
+    return load_history()
+
+
 @app.post("/api/generate-song")
 async def generate_song(
     title: str = Form("My Song"),
@@ -275,7 +326,10 @@ async def generate_song(
     final_output = GENERATED_DIR / f"{uuid.uuid4().hex}-final.wav"
     mix_two_wavs(str(beat_file), str(voice_file_path), str(final_output))
 
-    return {
+    final_audio_path = maybe_export_mp3(str(final_output))
+    final_audio_url = f"http://localhost:8000/generated/{os.path.basename(final_audio_path)}"
+
+    song_record = {
         "title": title,
         "genre": genre,
         "mood": mood,
@@ -284,8 +338,13 @@ async def generate_song(
         "style": style,
         "duration": duration,
         "lyrics": final_lyrics,
-        "audio_url": f"http://localhost:8000/generated/{final_output.name}",
+        "audio_url": final_audio_url,
         "voice_status": "Human-like voice synthesis enabled" if voice_generated else "Fallback voice layer active",
-        "voice_uploaded": saved_voice_path is not None,
         "generated_at": datetime.utcnow().isoformat() + "Z",
+    }
+    add_history_item(song_record)
+
+    return {
+        **song_record,
+        "voice_uploaded": saved_voice_path is not None,
     }

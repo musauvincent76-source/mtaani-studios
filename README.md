@@ -1,33 +1,25 @@
-# Private AI Music Studio
+# Private AI Music Studio - Upgraded
 
-This project is a browser-based personal music studio for creating songs using custom lyrics, optional voice upload, and a warm string / benga / Afro-inspired beat.
+Advanced browser-based personal music studio with voice synthesis, song history, and MP3 export.
 
 ## Features
-- personal/private song studio
-- custom lyrics input
-- optional voice upload
-- style selection (strings / benga / afrobeat / acoustic / soul)
-- final generated song preview and download
-- optional ElevenLabs integration for more human-like voice output
+- **Personal Studio**: Private music creation workspace
+- **Custom Lyrics**: Write your own or auto-generate
+- **Voice Upload**: Upload your voice sample for personalized output
+- **Style Selection**: strings, benga, afrobeat, acoustic, soul
+- **Song History**: Save and reload past creations
+- **MP3 Export**: Download songs in MP3 format (with ffmpeg)
+- **Human-like Voice**: Optional ElevenLabs integration
+- **Real-time Preview**: Play and edit before download
 
 ## Stack
 - Frontend: React + Vite
 - Backend: Python + FastAPI
-- Audio: Python WAV generation and mixing
-- Optional voice API: ElevenLabs
+- Audio: WAV generation, mixing, MP3 conversion
+- Voice API: ElevenLabs (optional)
+- Storage: Local JSON history
 
-## Project structure
-
-- `backend/main.py`
-- `backend/requirements.txt`
-- `backend/.env.example`
-- `frontend/package.json`
-- `frontend/index.html`
-- `frontend/src/main.jsx`
-- `frontend/src/App.jsx`
-- `frontend/src/styles.css`
-
-## Run locally
+## Quick Start
 
 ### Backend
 ```bash
@@ -45,19 +37,16 @@ npm install
 npm run dev
 ```
 
-Then open:
-```text
-http://localhost:5173
-```
+Open: http://localhost:5173
 
-## Optional voice API setup
-Create environment variables for ElevenLabs:
+## ElevenLabs Setup (Optional)
 ```bash
-export ELEVENLABS_API_KEY="your_api_key_here"
+export ELEVENLABS_API_KEY="your_key_here"
 export ELEVENLABS_VOICE_ID="your_voice_id_here"
 ```
 
-If those are not set, the app still works using a fallback voice-like synth.
-
 ## Notes
-This is a personal/private MVP. It is designed for your own music creation workflow rather than a public audience product.
+- This is a personal/private MVP
+- Song history stored in `backend/history.json`
+- FFmpeg required for MP3 export (optional)
+- Works without voice API using fallback synth
